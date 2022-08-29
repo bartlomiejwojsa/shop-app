@@ -8,7 +8,8 @@
     "build": "rimraf ./dist && tsc",
     "start-dev": "NODE_ENV='development' node dist/server.js",
     "start-prod": "NODE_ENV='production' node dist/server.js",
-    "start": "npm run build && NODE_ENV='development' node dist/server.js"
+    "start": "npm run build && NODE_ENV='development' node dist/server.js",
+    "heroku-postbuild": "npm run build"
   },
   "author": "bw",
   "license": "ISC",
