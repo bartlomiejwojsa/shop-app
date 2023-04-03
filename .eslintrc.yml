@@ -9,6 +9,8 @@ parserOptions:
   ecmaVersion: latest
 plugins:
   - '@typescript-eslint'
-rules: {}
+rules: {
+  "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+}
 globals:
   process: true

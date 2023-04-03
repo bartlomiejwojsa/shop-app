@@ -1,7 +1,24 @@
 import express, { Application } from 'express';
 import mongoose from 'mongoose';
+import './config'
+
+import { Request, Response, NextFunction } from 'express'
+import cookieParser from 'cookie-parser'
+import flash from 'connect-flash'
+import basicAuth from './middleware/basic-auth'
+import bodyParser from 'body-parser'
+import ErrorController from './controllers/error'
+import ShopController from './controllers/shop'
+import AuthController from './controllers/auth'
+import AdminController from './controllers/admin'
 
 
+import session from 'express-session';
+import connectMongoDBSession from 'connect-mongodb-session';
+
+import { mongoURI, mongoSessionKey } from './util/index';
+
+//https://akoskm.com/how-to-use-express-session-with-custom-sessiondata-typescript
 declare module 'express-session' {
   // eslint-disable-next-line no-unused-vars
   interface SessionData {
@@ -13,50 +30,76 @@ class App {
   public app: Application
   public port: number
 
-  constructor(middleWares: any, controllers: any) {
+  constructor() {
     this.app = express()
-    this.port = +(process.env.PORT ?? 3000);
+    this.port = +process.env.PORT!;
 
-    this.assets();
-    this.template();
-    this.middlewares(middleWares);
-    this.routes(controllers);
-    this.unknown();
+    this.useAssets();
+    this.setTemplates();
+    this.loadMiddlewares();
+    this.loadRoutes();
+    this.loadUnknownHandler();
   }
 
   // eslint-disable-next-line no-unused-vars
-  private middlewares(middleWares: { forEach: (arg0: (middleWare: any) => void) => void; }) {
-      middleWares.forEach(middleWare => {
-        this.app.use(middleWare);
+  private loadMiddlewares() {
+      this.app.use(bodyParser.urlencoded({ extended: false }))
+      this.app.use(cookieParser())
+
+      const MongoDBStore = connectMongoDBSession(session);
+
+      const store = new MongoDBStore({
+        uri: String(mongoURI ?? ""),
+        collection: 'sessions'
+      });
+
+      this.app.use(session({
+        name: mongoSessionKey,
+        secret: mongoSessionKey,
+        resave: false,
+        saveUninitialized: false,
+        store: store
+      }))
+      this.app.use(flash())
+      this.app.use(basicAuth)
+      this.app.use((req: Request, res: Response, next: NextFunction) => {
+        let isLoggedIn = req.session?.isLoggedIn ?? false
+        res.locals.isAuthenticated = isLoggedIn
+        next()
       })
   }
 
   // eslint-disable-next-line no-unused-vars
-  private routes(controllers: { forEach: (arg0: (controller: any) => void) => void; }) {
-      controllers.forEach(controller => {
-        this.app.use(controller.path, controller.router)
-      });
+  private loadRoutes() {
+    const adminController = new AdminController()
+    const authController = new AuthController()
+    const errorController = new ErrorController()
+    const shopController = new ShopController()
+    
+    this.app.use(adminController.path, adminController.router)
+    this.app.use(authController.path, authController.router)
+    this.app.use(errorController.path, errorController.router)
+    this.app.use(shopController.path, shopController.router)
   }
 
-  private assets() {
+  private useAssets() {
     this.app.use(express.static('public'));
     this.app.use(express.static('views'));
     this.app.use('/images', express.static('images'));
   }
 
-  private template() {
+  private setTemplates() {
     this.app.set('view engine', 'ejs');
     this.app.set('views', 'views');
   }
   
-  private unknown() {
+  private loadUnknownHandler() {
     // eslint-disable-next-line no-unused-vars
     this.app.use((_error: any, req: any, res: any, _next: any) => {
-      // res.status(error.httpStatusCode).render(...);
-      // res.redirect('/500');
+      console.log(_error)
       let isLoggedIn = req.session?.isLoggedIn ?? false;
       res.status(500).render('500', {
-        pageTitle: 'Error!',
+        pageTitle: 'Err',
         path: '/500',
         isAuthenticated: isLoggedIn,
       });
@@ -64,22 +107,19 @@ class App {
   }
 
   public listen() {
-    if (process.env.MONGODB_URI) {
-      try {
+    if (mongoURI) {
         mongoose
-          // eslint-disable-next-line no-unused-vars
-          .connect(process.env.MONGODB_URI, {}, (_result) => {
-            this.app.listen(this.port, () => {
-              console.log(`App listening on the http://localhost:${this.port}`);
-            });
+          .connect(String(mongoURI ?? ""))
+          .catch( err => {
+            if (err) {
+              throw new Error(`Couldnt connect to database, ${String(err)}`);
+            }
           })
-      } catch (err) {
-        console.log(err);
-      }
+        this.app.listen(this.port, () => {
+          console.log(`App listening on the http://localhost:${this.port}`);
+        });
     } else {
-      throw new Error(
-        `'MONGODB_URI' ${process.env.MONGODB_URI} is not defined, cannot connect to database!`
-      );
+      console.log(`MongoDB uri couldnt be constructed because of missing env variables, cannot connect to database!`);
     }
   }
 }

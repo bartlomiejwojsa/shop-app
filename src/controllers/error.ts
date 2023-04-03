@@ -33,7 +33,7 @@ class ErrorController {
       path: '/404',
       isAuthenticated: req.session?.isLoggedIn ?? false,
     }
-    res.status(404).render('404', viewOptions)
+    return res.status(404).render('404', viewOptions)
   }
   get500 = (req: Request, res: Response) => {
     const viewOptions: Err500PageOptions = {
@@ -41,7 +41,7 @@ class ErrorController {
       path: '/500',
       isAuthenticated: req.session?.isLoggedIn ?? false,
     }
-    res.status(500).render('500', viewOptions)
+    return res.status(500).render('500', viewOptions)
   }
 }
 

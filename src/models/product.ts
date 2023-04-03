@@ -1,10 +1,12 @@
 import mongoose, { Schema, Document} from 'mongoose';
 import { IUserDocument } from './user'
 
-export interface IProduct extends Document {
+export interface ProductModel {
   title: string;
   price: number;
   description: string;
+}
+export interface IProduct extends ProductModel, Document {
   imageUrl: string;
   userId: IUserDocument['_id'];
 }

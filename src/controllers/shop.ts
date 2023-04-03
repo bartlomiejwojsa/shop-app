@@ -10,6 +10,9 @@ import Order from '../models/order';
 
 import isAuth from '../middleware/is-auth';
 import { IUserDocument } from '../models/user';
+import csrf from 'csurf'
+
+const csrfProtection = csrf( { cookie: true })
 
 const ITEMS_PER_PAGE = 4;
 
@@ -22,19 +25,61 @@ class ShopController {
   }
 
   private initializeRouter = () => {
-    this.router.get('/', this.getIndex);
-    this.router.get('/products', this.getProducts);
+    this.router.get(
+      '/',
+      csrfProtection,
+      this.getIndex
+    );
+    this.router.get(
+      '/products',
+      csrfProtection,
+      this.getProducts
+    );
     this.router.get(
       '/products/:productId',
+      csrfProtection,
       this.getProduct
     );
-    this.router.get('/cart', isAuth, this.getCart);
-    this.router.post('/cart', isAuth, this.postCart);
-    this.router.post('/cart-delete-item', isAuth, this.postCartDeleteProduct);
-    this.router.get('/checkout', isAuth, this.getCheckout);
-    this.router.post('/create-order', isAuth, this.postOrder);
-    this.router.get('/orders', isAuth, this.getOrders);
-    this.router.get('/orders/:orderId', isAuth, this.getInvoice);
+    this.router.get(
+      '/cart',
+      csrfProtection,
+      isAuth,
+      this.getCart
+    );
+    this.router.post(
+      '/cart',
+      csrfProtection,
+      isAuth,
+      this.postCart
+    );
+    this.router.post(
+      '/cart-delete-item',
+      csrfProtection,
+      isAuth,
+      this.postCartDeleteProduct
+    );
+    this.router.get(
+      '/checkout',
+      csrfProtection,
+      isAuth,
+      this.getCheckout
+    );
+    this.router.post(
+      '/create-order',
+      csrfProtection,
+      isAuth,
+      this.postOrder
+    );
+    this.router.get(
+      '/orders',
+      isAuth,
+      this.getOrders
+    );
+    this.router.get(
+      '/orders/:orderId',
+      isAuth,
+      this.getInvoice
+    );
   };
 
   getProducts = (
@@ -42,6 +87,8 @@ class ShopController {
     res: Response,
     next: NextFunction
   ): void => {
+    res.locals.csrfToken = req.csrfToken()
+
     const page = +(req.query?.page ?? 1);
     let totalItems: number;
 
@@ -78,6 +125,7 @@ class ShopController {
     res: Response,
     next: NextFunction
   ): void => {
+    res.locals.csrfToken = req.csrfToken()
     const page = +(req.query?.page ?? 1);
     let totalItems: number;
     Product.find()
@@ -113,6 +161,8 @@ class ShopController {
     res: Response,
     next: NextFunction
   ): void => {
+    res.locals.csrfToken = req.csrfToken()
+
     const productId = req.params.productId ?? '';
 
     Product.findById(productId)
@@ -135,6 +185,7 @@ class ShopController {
     res: Response,
     next: NextFunction
   ): void => {
+    res.locals.csrfToken = req.csrfToken()
     const myUser: IUserDocument = req.user!
     myUser.populate('cart.items.productId')
       .then((user) => {
@@ -166,8 +217,7 @@ class ShopController {
         }
         throw new Error('invalid product');
       })
-      .then((result) => {
-        console.log(result);
+      .then((_) => {
         res.redirect('/cart');
       })
       .catch((err) => {
@@ -200,6 +250,7 @@ class ShopController {
     res: Response,
     next: NextFunction
   ): void => {
+    res.locals.csrfToken = req.csrfToken()
     const myUser: IUserDocument = req.user!;
     myUser
       .populate('cart.items.productId')
@@ -326,20 +377,6 @@ class ShopController {
         pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
   
         pdfDoc.end();
-        // fs.readFile(invoicePath, (err, data) => {
-        //   if (err) {
-        //     return next(err);
-        //   }
-        //   res.setHeader('Content-Type', 'application/pdf');
-        //   res.setHeader(
-        //     'Content-Disposition',
-        //     'inline; filename="' + invoiceName + '"'
-        //   );
-        //   res.send(data);
-        // });
-        // const file = fs.createReadStream(invoicePath);
-  
-        // file.pipe(res);
       })
       .catch(err => next(err));
   };

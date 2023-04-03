@@ -1,9 +1,8 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { body, check } from 'express-validator'
-// import { updateFromPartial } from '../util'
 import { User } from '../models/user'
 import express, {
   Request,
@@ -11,14 +10,17 @@ import express, {
   NextFunction,
 } from 'express'
 import { validationResult } from 'express-validator'
+import csrf from 'csurf'
+
+const csrfProtection = csrf( { cookie: true })
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
-    user: "vojsicky@gmail.com",
-    pass: "ybdvuqzuborxqmxz",
+    user: process.env.MAIL_SENDER,
+    pass: process.env.MAIL_SECRET,
   },
   logger: true
 })
@@ -32,9 +34,14 @@ class AuthController {
   }
 
   private initializeRouter = () => {
-    this.router.get('/login', this.getLogin)
+    this.router.get(
+      '/login',
+      csrfProtection,
+      this.getLogin
+    )
     this.router.post(
       '/login',
+      csrfProtection,
       [
         body('email')
           .isEmail()
@@ -48,9 +55,14 @@ class AuthController {
       ],
       this.postLogin
     )
-    this.router.get('/signup', this.getSignup)
+    this.router.get(
+      '/signup',
+      csrfProtection,
+      this.getSignup
+    )
     this.router.post(
       '/signup',
+      csrfProtection,
       [
         check('email')
           .isEmail()
@@ -88,14 +100,34 @@ class AuthController {
       ],
       this.postSignup
     )
-    this.router.post('/logout', this.postLogout)
-    this.router.get('/reset', this.getReset)
-    this.router.post('/reset', this.postReset)
-    this.router.get('/reset/:token', this.getNewPassword)
-    this.router.post('/new-password', this.postNewPassword)
+    this.router.post(
+      '/logout',
+      this.postLogout
+    )
+    this.router.get(
+      '/reset',
+      csrfProtection,
+      this.getReset
+    )
+    this.router.post(
+      '/reset',
+      csrfProtection,
+      this.postReset
+    )
+    this.router.get(
+      '/reset/:token',
+      csrfProtection,
+      this.getNewPassword
+    )
+    this.router.post(
+      '/new-password',
+      csrfProtection,
+      this.postNewPassword
+    )
   }
 
   getLogin = (req: Request, res: Response): void => {
+    res.locals.csrfToken = req.csrfToken()
     let messages = req.flash('error')
     let message: string | null = ''
     if (messages.length > 0) {
@@ -185,6 +217,7 @@ class AuthController {
   }
 
   getSignup = (req: Request, res: Response): void => {
+    res.locals.csrfToken = req.csrfToken()
     let messages = req.flash('error')
     let message: string | null = ''
     if (messages.length > 0) {
@@ -258,6 +291,7 @@ class AuthController {
   }
 
   getReset = (req: Request, res: Response): void => {
+    res.locals.csrfToken = req.csrfToken()
     let messages = req.flash('error')
     let message: string | null = ''
     if (messages.length > 0) {
@@ -318,6 +352,7 @@ class AuthController {
     req: Request,
     res: Response
   ): Promise<void> => {
+    res.locals.csrfToken = req.csrfToken()
     const token = req.params.token
     const user = await User.findOne({
       resetToken: token,
@@ -366,11 +401,6 @@ class AuthController {
         resetUser.password = newPassHashed;
         resetUser.resetToken = undefined;
         resetUser.resetTokenExpiration = undefined;
-        // const updatedUser = updateFromPartial<typeof resetUser>(resetUser, {
-        //   password: newPassHashed,
-        //   resetToken: undefined,
-        //   resetTokenExpiration: undefined
-        // })
         await resetUser.save()
         res.redirect('/login')
       } catch (err) {
