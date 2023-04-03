@@ -258,7 +258,7 @@ class ShopController {
         const products = user.cart.items;
         let total = 0;
         products.forEach(p => {
-          total += p.quantity * p.productId.price;
+          total += p.quantity * p.productId?.price;
         });
         res.render('shop/checkout', {
           path: '/checkout',
@@ -361,24 +361,27 @@ class ShopController {
         pdfDoc.text('-----------------------');
         let totalPrice = 0;
         order.products.forEach(prod => {
-          totalPrice += prod.quantity * prod.product.price;
+          totalPrice += prod.quantity * (prod.product?.price ?? 0);
           pdfDoc
             .fontSize(14)
             .text(
-              prod.product.title +
+              (prod.product?.title ?? "unknown") +
                 ' - ' +
                 prod.quantity +
                 ' x ' +
                 '$' +
-                prod.product.price
+                (prod.product?.price ?? 0)
             );
         });
         pdfDoc.text('---');
         pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
-  
+        console.log('Total Price: $' + totalPrice)
         pdfDoc.end();
       })
-      .catch(err => next(err));
+      .catch(err => {
+        console.log(err)
+        next(err)
+      });
   };
 }
 

@@ -325,13 +325,18 @@ class AuthController {
           user.resetToken = token
           user.resetTokenExpiration = Date.now() + 3600000
           await user.save()
+          var adress = `http://localhost:${process.env.PORT}`
+          if (process.env.IS_GLITCH_SERVER) {
+            adress = `https://${process.env.PROJECT_DOMAIN}.glitch.me`
+          }
+
           transporter.sendMail({
             to: req.body.email,
             from: 'solainer1521@gmail.com',
             subject: 'Password reset',
             html: `
               <p>You requested a password reset</p>
-              <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+              <p>Click this <a href="${adress}/reset/${token}">link</a> to set a new password.</p>
             `,
           })
           res.redirect('/')
