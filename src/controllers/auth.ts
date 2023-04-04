@@ -157,6 +157,7 @@ class AuthController {
 
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+      res.locals.csrfToken = req.csrfToken()
       return res.status(422).render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
@@ -171,6 +172,7 @@ class AuthController {
     User.findOne({ email: email })
       .then((user) => {
         if (!user) {
+          res.locals.csrfToken = req.csrfToken()
           return res.status(422).render('auth/login', {
             path: '/login',
             pageTitle: 'Login',
@@ -193,6 +195,7 @@ class AuthController {
                 res.redirect('/')
               })
             }
+            res.locals.csrfToken = req.csrfToken()
             return res.status(422).render('auth/login', {
               path: '/login',
               pageTitle: 'Login',
@@ -248,6 +251,7 @@ class AuthController {
 
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+      res.locals.csrfToken = req.csrfToken()
       return res.status(422).render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
@@ -270,7 +274,6 @@ class AuthController {
       await newUser.save()
       const mailOpts = {
         to: email,
-        from: 'solainer1521@gmail.com',
         subject: 'Signup succeeded!',
         html: `<h1>You successfully signed up!</h1>
               <img src='https://streetwear.pl/wp-content/uploads/2019/11/bezpieczne-zakupy-w-grupach-streetwear-560x420.jpg'>
@@ -332,7 +335,6 @@ class AuthController {
 
           transporter.sendMail({
             to: req.body.email,
-            from: 'solainer1521@gmail.com',
             subject: 'Password reset',
             html: `
               <p>You requested a password reset</p>
