@@ -102,7 +102,6 @@ class AdminController {
     next: NextFunction
   ): void => {
     try {
-      console.log("postAddProduct")
       res.locals.csrfToken = req.csrfToken()
 
       const productModel: ProductModel = req.body;
@@ -147,11 +146,11 @@ class AdminController {
         })
         .catch((err) => {
           const error = new Error(err);
-          console.log(error)
           return next(error);
         });
     } catch (err) {
-      console.log('ERRR',err);
+      const error = new Error(`Ocurred error while adding product: ${String(err)}`);
+      return next(error);
     }
   };
 
@@ -256,7 +255,6 @@ class AdminController {
           product.imageUrl = image.path;
         }
         return product.save().then(_ => {
-          console.log('UPDATED PRODUCT!');
           res.redirect('/admin/products');
         });
       })
@@ -282,7 +280,6 @@ class AdminController {
         return product.deleteOne();
       })
       .then(() => {
-        console.log('DESTROYED PRODUCT');
         res.status(200).json({ message: 'Success!' });
       })
       .catch(_err => {

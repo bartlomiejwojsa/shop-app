@@ -96,7 +96,7 @@ class App {
   private loadUnknownHandler() {
     // eslint-disable-next-line no-unused-vars
     this.app.use((_error: any, req: any, res: any, _next: any) => {
-      console.log(_error)
+      console.log("None of routes was able handle this request",_error)
       let isLoggedIn = req.session?.isLoggedIn ?? false;
       res.status(500).render('500', {
         pageTitle: 'Err',

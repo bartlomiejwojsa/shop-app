@@ -16,7 +16,6 @@ declare module 'express' {
 }
 
 export default (req: Request, _res: Response, next: NextFunction) => {
-  console.log(req.body)
   if (!req.session.user) {
     return next();
   }

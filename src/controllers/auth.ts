@@ -190,8 +190,7 @@ class AuthController {
             if (doMatch) {
               req.session.isLoggedIn = true
               req.session.user = user
-              return req.session.save((err) => {
-                console.log(err)
+              return req.session.save((_err) => {
                 res.redirect('/')
               })
             }
@@ -207,8 +206,7 @@ class AuthController {
               validationErrors: [],
             })
           })
-          .catch((err) => {
-            console.log(err)
+          .catch((_err) => {
             res.redirect('/login')
           })
       })
@@ -287,8 +285,7 @@ class AuthController {
   }
 
   postLogout = (req: Request, res: Response): void => {
-    req.session.destroy((err) => {
-      console.log(err)
+    req.session.destroy((_err) => {
       res.redirect('/')
     })
   }
@@ -316,7 +313,6 @@ class AuthController {
   ): void => {
     crypto.randomBytes(32, async (err, buffer) => {
       if (err) {
-        console.log(err)
         return res.redirect('/reset')
       }
       const token = buffer.toString('hex')
@@ -391,7 +387,8 @@ class AuthController {
 
   postNewPassword = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     const newPassword = req.body.password
     const userId = req.body.userId
@@ -411,7 +408,7 @@ class AuthController {
         await resetUser.save()
         res.redirect('/login')
       } catch (err) {
-        console.log(err)
+        return next(err)
       }
     } else {
       req.flash(

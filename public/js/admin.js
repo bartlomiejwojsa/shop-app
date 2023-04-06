@@ -13,8 +13,7 @@ const deleteProduct = btn => {
     .then(result => {
       return result.json();
     })
-    .then(data => {
-      console.log(data);
+    .then(_data => {
       productElement.parentNode.removeChild(productElement);
     })
     .catch(err => {

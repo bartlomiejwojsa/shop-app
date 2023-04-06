@@ -45,7 +45,7 @@ const upload = multer({ storage: fileStorage, fileFilter: fileFilter });
 export default (req: Request, res: Response, next: NextFunction) => {
   return upload.single('image')(req, res, () => {
     if (!req.file) {
-      return res.json({ error: new Error('Occured problem while uploading photo!')})
+      return res.status(500).json({ error: 'Occured problem while uploading photo!'})
     }
     next();
   });

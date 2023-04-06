@@ -375,11 +375,9 @@ class ShopController {
         });
         pdfDoc.text('---');
         pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
-        console.log('Total Price: $' + totalPrice)
         pdfDoc.end();
       })
       .catch(err => {
-        console.log(err)
         next(err)
       });
   };
