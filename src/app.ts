@@ -12,6 +12,7 @@ import ShopController from './controllers/shop'
 import AuthController from './controllers/auth'
 import AdminController from './controllers/admin'
 
+import APIAdminController from './controllers/api/admin'
 
 import session from 'express-session';
 import connectMongoDBSession from 'connect-mongodb-session';
@@ -75,11 +76,15 @@ class App {
     const authController = new AuthController()
     const errorController = new ErrorController()
     const shopController = new ShopController()
+
+    const apiAdminController = new APIAdminController()
     
     this.app.use(adminController.path, adminController.router)
     this.app.use(authController.path, authController.router)
     this.app.use(errorController.path, errorController.router)
     this.app.use(shopController.path, shopController.router)
+
+    this.app.use(apiAdminController.path, apiAdminController.router)
   }
 
   private useAssets() {

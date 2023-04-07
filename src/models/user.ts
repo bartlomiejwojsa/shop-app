@@ -4,6 +4,7 @@ import { IProduct } from './product';
 interface IUser extends Document {
   email: string;
   password: string;
+  apiKey: string;
   resetToken: string | undefined;
   resetTokenExpiration: number | undefined;
   cart: {
@@ -35,6 +36,10 @@ const schema = new Schema<IUserDocument>({
     required: true
   },
   password: {
+    type: String,
+    required: true
+  },
+  apiKey: {
     type: String,
     required: true
   },

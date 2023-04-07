@@ -11,6 +11,7 @@ import express, {
 } from 'express'
 import { validationResult } from 'express-validator'
 import csrf from 'csurf'
+import { generateApiKey } from 'generate-api-key';
 
 const csrfProtection = csrf( { cookie: true })
 
@@ -267,6 +268,7 @@ class AuthController {
       const newUser = new User({
         email: email,
         password: hashedPass,
+        apiKey: generateApiKey(),
         cart: { items: [] },
       })
       await newUser.save()
