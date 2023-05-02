@@ -2,6 +2,12 @@ import mongoose, { Schema, Document} from 'mongoose';
 import { IProduct } from './product'
 import { IUserDocument } from './user'
 
+export enum OrderStatus {
+  FINISHED = 'FINISHED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  CANCELLED = 'CANCELLED'
+}
+
 export interface IOrder extends Document {
   products: {
     product: IProduct['_id']
@@ -11,6 +17,7 @@ export interface IOrder extends Document {
     email: string
     userId: IUserDocument['_id']
   };
+  status: OrderStatus;
 }
 
 const orderSchema = new Schema<IOrder>({
@@ -34,6 +41,10 @@ const orderSchema = new Schema<IOrder>({
       required: true,
       ref: 'User'
     }
+  },
+  status: {
+    type: String,
+    required: true
   }
 });
 

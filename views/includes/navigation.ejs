@@ -21,7 +21,7 @@
                     </a>
                 </li>
                 <li class="main-header__item">
-                    <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
+                    <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">My Products
                     </a>
                 </li>
             <% } %>
@@ -39,6 +39,9 @@
                     <form action="/logout" method="post">
                         <button type="submit">Logout</button>
                     </form>
+                </li>
+                <li class="main-header__item">
+                    <span><%= coins > -1 ? coins : 0 %> $ </span>
                 </li>
             <% } %>
         </ul>
@@ -65,7 +68,7 @@
                 </a>
             </li>
             <li class="mobile-nav__item">
-                <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
+                <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">My Products
                 </a>
             </li>
         <% } %>

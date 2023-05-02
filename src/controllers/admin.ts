@@ -11,6 +11,7 @@ import isAuth from '../middleware/is-auth';
 import Product, { ProductModel } from '../models/product';
 
 import csrf from 'csurf'
+import { PRODUCT_CATEGORIES, getProductCategoryById } from '../models/productCategory';
 
 const csrfProtection = csrf( { cookie: true })
 
@@ -86,27 +87,33 @@ class AdminController {
 
   getAddProduct = (req: Request, res: Response): void => {
     res.locals.csrfToken = req.csrfToken()
+    const productCategories = PRODUCT_CATEGORIES
     res.render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
       editing: false,
       hasError: false,
       errorMessage: null,
-      validationErrors: []
+      validationErrors: [],
+      productCategories
     });
   };
 
-  postAddProduct = (
+  postAddProduct = async (
     req: Request,
     res: Response,
     next: NextFunction
-  ): void => {
+  ): Promise<void> => {
     try {
       res.locals.csrfToken = req.csrfToken()
 
       const productModel: ProductModel = req.body;
       const image = req.file;
+      console.log(req.body.category)
+      const productCategory = await getProductCategoryById(req.body.category)
+      console.log(productCategory)
       if (!image) {
+        const productCategories = PRODUCT_CATEGORIES
         return res.status(422).render('admin/edit-product', {
           pageTitle: 'Add Product',
           path: '/admin/add-product',
@@ -114,12 +121,14 @@ class AdminController {
           hasError: true,
           product: productModel,
           errorMessage: 'Attached file is not an image.',
-          validationErrors: []
+          validationErrors: [],
+          productCategories
         });
       }
       const errors = validationResult(req);
   
       if (!errors.isEmpty()) {
+        const productCategories = PRODUCT_CATEGORIES
         return res.status(422).render('admin/edit-product', {
           pageTitle: 'Add Product',
           path: '/admin/add-product',
@@ -127,7 +136,8 @@ class AdminController {
           hasError: true,
           product: productModel,
           errorMessage: errors.array()[0].msg,
-          validationErrors: errors.array()
+          validationErrors: errors.array(),
+          productCategories
         });
       }
   
@@ -136,7 +146,8 @@ class AdminController {
       const product = new Product({
         ...productModel,
         imageUrl: imageUrl,
-        userId: req.user
+        userId: req.user,
+        category: productCategory
       });
       product
         .save()
@@ -164,7 +175,7 @@ class AdminController {
       .then(products => {
         res.render('admin/products', {
           prods: products,
-          pageTitle: 'Admin Products',
+          pageTitle: 'My Products',
           path: '/admin/products'
         });
       })
@@ -193,6 +204,7 @@ class AdminController {
         if (!product) {
           return res.redirect('/');
         }
+        const productCategories = PRODUCT_CATEGORIES
         res.render('admin/edit-product', {
           pageTitle: 'Edit Product',
           path: '/admin/edit-product',
@@ -200,7 +212,8 @@ class AdminController {
           product: product,
           hasError: false,
           errorMessage: null,
-          validationErrors: []
+          validationErrors: [],
+          productCategories
         });
       })
       .catch(err => {
@@ -223,6 +236,7 @@ class AdminController {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+      const productCategories = PRODUCT_CATEGORIES
       return res.status(422).render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
@@ -235,7 +249,8 @@ class AdminController {
           _id: prodId
         },
         errorMessage: errors.array()[0].msg,
-        validationErrors: errors.array()
+        validationErrors: errors.array(),
+        productCategories
       });
     }
 

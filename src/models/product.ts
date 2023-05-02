@@ -1,14 +1,17 @@
 import mongoose, { Schema, Document} from 'mongoose';
 import { IUserDocument } from './user'
+import { IProductCategory } from './productCategory';
+
 
 export interface ProductModel {
   title: string;
   price: number;
-  description: string;
-}
+  description: string;}
+
 export interface IProduct extends ProductModel, Document {
   imageUrl: string;
   userId: IUserDocument['_id'];
+  category: IProductCategory['_id'];
 }
 
 const productSchema = new Schema<IProduct>({
@@ -32,6 +35,10 @@ const productSchema = new Schema<IProduct>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'ProductCategory'
   }
 });
 

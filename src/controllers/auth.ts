@@ -269,6 +269,7 @@ class AuthController {
         email: email,
         password: hashedPass,
         apiKey: generateApiKey(),
+        coins: 0,
         cart: { items: [] },
       })
       await newUser.save()

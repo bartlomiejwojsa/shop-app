@@ -17,13 +17,12 @@ declare module 'express' {
 
 export default (req: Request, res: Response, next: NextFunction) => {
   if (!req.session.user) {
-    return next();
+    return res.status(401).json({ error: "Unauthorized" })
   }
-  let apiKey = req.query.apiKey ?? '';
-
+  const apiKey = req.query.apiKey ?? '';
   User.findOne({ apiKey: apiKey })
     .then((user) => {
-      if (!user) {
+      if (!user || apiKey !== req.session.user?.apiKey) {
         return res.status(401).json({ error: "Unauthorized" })
       }
       req.user = user;

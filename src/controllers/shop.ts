@@ -6,7 +6,7 @@ import PDFDocument from 'pdfkit';
 import { Request, Response, NextFunction } from 'express';
 
 import Product from '../models/product';
-import Order from '../models/order';
+import Order, { OrderStatus } from '../models/order';
 
 import isAuth from '../middleware/is-auth';
 import { IUserDocument } from '../models/user';
@@ -289,7 +289,8 @@ class ShopController {
             email: user.email,
             userId: user
           },
-          products: products
+          products: products,
+          status: OrderStatus.IN_PROGRESS
         });
         return order.save();
       })

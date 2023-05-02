@@ -38,6 +38,14 @@
                     value="<% if (editing || hasError) { %><%= product.price %><% } %>">
             </div>
             <div class="form-control">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <% productCategories.forEach(category => { %>
+                        <option value="<%= category.id %>" title="<%= category.description %>"><%= category.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="form-control">
                 <label for="description">Description</label>
                 <textarea 
                     class="<%= validationErrors.find(e => e.param === 'description') ? 'invalid' : '' %>"

@@ -66,6 +66,8 @@ class App {
       this.app.use((req: Request, res: Response, next: NextFunction) => {
         let isLoggedIn = req.session?.isLoggedIn ?? false
         res.locals.isAuthenticated = isLoggedIn
+        let coins = req.session?.user?.coins ?? -1
+        res.locals.coins = coins
         next()
       })
   }

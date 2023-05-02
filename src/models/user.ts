@@ -10,6 +10,7 @@ interface IUser extends Document {
   cart: {
     items: ProductInCart[];
   };
+  coins: number;
 }
 
 interface ProductInCart {
@@ -41,6 +42,10 @@ const schema = new Schema<IUserDocument>({
   },
   apiKey: {
     type: String,
+    required: true
+  },
+  coins: {
+    type: Number,
     required: true
   },
   resetToken: String,
