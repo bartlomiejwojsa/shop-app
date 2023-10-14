@@ -5,11 +5,11 @@ import path from 'path';
 import PDFDocument from 'pdfkit';
 import { Request, Response, NextFunction } from 'express';
 
-import Product from '../models/product';
-import Order, { OrderStatus } from '../models/order';
+import Product from '../../models/product';
+import Order, { OrderStatus } from '../../models/order';
 
-import isAuth from '../middleware/is-auth';
-import { IUserDocument } from '../models/user';
+import isAuth from '../../middleware/is-auth';
+import { IUserDocument } from '../../models/user';
 import csrf from 'csurf'
 
 const csrfProtection = csrf( { cookie: true })
@@ -190,6 +190,7 @@ class ShopController {
     myUser.populate('cart.items.productId')
       .then((user) => {
         const products = user.cart.items;
+        console.log(products);
         res.render('shop/cart', {
           path: '/cart',
           pageTitle: 'Your Cart',

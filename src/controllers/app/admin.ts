@@ -1,17 +1,17 @@
 import * as express from 'express';
 import { NextFunction, Request, Response } from 'express';
 
-import multer from '../middleware/multer'
-import { deleteFile } from '../util/file';
+import multer from '../../middleware/multer'
+import { deleteFile } from '../../util/file';
 import { body } from 'express-validator'
 
 import { validationResult } from 'express-validator';
 
-import isAuth from '../middleware/is-auth';
-import Product, { ProductModel } from '../models/product';
+import isAuth from '../../middleware/is-auth';
+import Product, { ProductModel } from '../../models/product';
 
 import csrf from 'csurf'
-import { PRODUCT_CATEGORIES, getProductCategoryById } from '../models/productCategory';
+import ProductCategory, { PRODUCT_CATEGORIES } from '../../models/productCategory';
 
 const csrfProtection = csrf( { cookie: true })
 
@@ -109,9 +109,6 @@ class AdminController {
 
       const productModel: ProductModel = req.body;
       const image = req.file;
-      console.log(req.body.category)
-      const productCategory = await getProductCategoryById(req.body.category)
-      console.log(productCategory)
       if (!image) {
         const productCategories = PRODUCT_CATEGORIES
         return res.status(422).render('admin/edit-product', {
@@ -142,12 +139,12 @@ class AdminController {
       }
   
       const imageUrl = image.path;
-  
+      const prodCategory = await ProductCategory.findOne({ id: req.body.category })
       const product = new Product({
         ...productModel,
         imageUrl: imageUrl,
         userId: req.user,
-        category: productCategory
+        category: prodCategory
       });
       product
         .save()
@@ -222,16 +219,18 @@ class AdminController {
       });
   };
   
-  postEditProduct = (
+  postEditProduct = async (
     req: Request,
     res: Response,
     next: NextFunction
-  ): void => {
+  ): Promise<void> => {
     const prodId = req.body.productId;
     const updatedTitle = req.body.title;
     const updatedPrice = req.body.price;
     const image = req.file;
     const updatedDesc = req.body.description;
+    const updatedCategory= await ProductCategory.findOne({ id: req.body.category })
+
 
     const errors = validationResult(req);
 
@@ -265,6 +264,7 @@ class AdminController {
         product.title = updatedTitle;
         product.price = updatedPrice;
         product.description = updatedDesc;
+        product.category = updatedCategory;
         if (image) {
           deleteFile(product.imageUrl);
           product.imageUrl = image.path;
@@ -283,25 +283,17 @@ class AdminController {
   deleteProduct = (
     req: Request,
     res: Response,
-    next: NextFunction
   ): void => {
     const prodId = req.params.productId;
-    Product.findById(prodId)
-      .then(product => {
-        if (!product) {
-          return next(new Error('Product not found.'));
-        }
-        deleteFile(product.imageUrl);
-        return product.deleteOne();
-      })
-      .then(() => {
+    Product.findByIdAndDelete(prodId)
+      .then( result => {
+        console.log("deleted",result)
         res.status(200).json({ message: 'Success!' });
       })
       .catch(_err => {
         res.status(500).json({ message: 'Deleting product failed.' });
-      });
+      }); 
   };
-
 }
 
 export default AdminController;

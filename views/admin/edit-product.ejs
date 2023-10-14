@@ -21,11 +21,11 @@
                     value="<% if (editing || hasError) { %><%= product.title %><% } %>">
             </div>
             <div class="form-control">
-                <label for="image" class="drop-container">
-                    <span class="drop-title">Drop files here</span>
-                    or
-                    <input type="file" name="image" id="image" accept="image/*" required>
-                </label>
+                <label for="imageInput" class="custom-label">Choose an Image</label>
+                <div class="preview-container">
+                    <img id="imagePreview" src="<% if (editing) { %><%= `/${product.imageUrl}` %><% } %>" alt="">
+                </div>
+                <input type="file" id="imageInput" name="image" accept="image/*" onchange="previewImage()" required>
             </div>
             <div class="form-control">
                 <label for="price">Price</label>

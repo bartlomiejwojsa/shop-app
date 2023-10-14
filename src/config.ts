@@ -45,6 +45,8 @@ const throwIfNot = function <T, K extends keyof T>(
   'PORT',
   'MAIL_SENDER',
   'MAIL_SECRET',
+  'IS_GLITCH_SERVER',
+  'JWT_SECRET_KEY',
 ].forEach((v) => {
   throwIfNot(process.env, v);
 });
@@ -59,5 +61,7 @@ declare namespace NodeJS {
     MAIL_SENDER: string;
     MAIL_SECRET: string;
     PORT: string;
+    IS_GLITCH_SERVER: string;
+    JWT_SECRET_KEY: string;
   }
 }

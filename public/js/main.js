@@ -14,3 +14,27 @@ function menuToggleClickHandler() {
 
 backdrop.addEventListener('click', backdropClickHandler);
 menuToggle.addEventListener('click', menuToggleClickHandler);
+
+// eslint-disable-next-line no-unused-vars
+function previewImage() {
+  const input = document.getElementById('imageInput');
+  const preview = document.getElementById('imagePreview');
+  
+  if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+          preview.src = e.target.result;
+      };
+
+      reader.readAsDataURL(input.files[0]);
+  } else {
+      preview.src = '';
+  }
+}
+
+// Optional: You can also reset the form to clear the selected file and preview
+document.getElementById('imageUploadForm').addEventListener('reset', function() {
+  const preview = document.getElementById('imagePreview');
+  preview.src = '';
+});

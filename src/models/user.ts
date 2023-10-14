@@ -2,9 +2,11 @@ import { Schema, Document, model } from 'mongoose';
 import { IProduct } from './product';
 
 interface IUser extends Document {
+  nick: string;
   email: string;
   password: string;
-  apiKey: string;
+  imageUrl: string;
+  token: string;
   resetToken: string | undefined;
   resetTokenExpiration: number | undefined;
   cart: {
@@ -32,6 +34,10 @@ export interface IUserDocument extends IUser, Document {
 
 // And a schema that knows about IUserMethods
 const schema = new Schema<IUserDocument>({
+  nick: {
+    type: String,
+    required: true
+  },
   email: {
     type: String,
     required: true
@@ -40,7 +46,10 @@ const schema = new Schema<IUserDocument>({
     type: String,
     required: true
   },
-  apiKey: {
+  imageUrl: {
+    type: String
+  },
+  token: {
     type: String,
     required: true
   },

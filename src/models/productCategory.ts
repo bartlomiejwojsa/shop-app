@@ -1,13 +1,8 @@
 import mongoose, { Schema, Document} from 'mongoose';
 
-export enum ProductCategories {
-  CAT = 1,
-  DOG = 2,
-  OTHER = 3
-}
-
 export interface IProductCategory extends Document {
   id: number,
+  tag: string,
   name: string;
   description: string;
 }
@@ -18,6 +13,10 @@ const productCategorySchema = new Schema<IProductCategory>({
     type: Number,
     required: true,
     unique: true
+  },
+  tag: {
+    type: String,
+    required: true
   },
   name: {
     type: String,
@@ -33,16 +32,10 @@ const ProductCategory = mongoose.model<IProductCategory>('ProductCategory', prod
 
 // define the categories constant
 export const PRODUCT_CATEGORIES = [
-  { id: ProductCategories.CAT, name: 'Kitty', description: 'Cat dedicated stuff'},
-  { id: ProductCategories.DOG, name: 'Dog', description: 'Dog dedicated stuff'},
-  { id: ProductCategories.OTHER, name: 'Other', description: 'Other animal dedicated stuff'},
+  { id: 1, tag: "CAT", name: 'Cat', description: 'Cat dedicated stuff'},
+  { id: 2, tag: "DOG", name: 'Dog', description: 'Dog dedicated stuff'},
+  { id: 3, tag: "OTHER", name: 'Other', description: 'Other animal dedicated stuff'},
 ];
-
-export async function getProductCategoryById(id: ProductCategories): Promise<IProductCategory | null> {
-  console.log("WHATTHEFUCK")
-  const category = await ProductCategory.findOne({ id: id});
-  return category;
-}
 
 // insert the categories constant into the ProductCategory collection, avoiding duplicates
 Promise.all(PRODUCT_CATEGORIES.map((category) => {

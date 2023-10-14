@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { body, check } from 'express-validator'
-import { User } from '../models/user'
+import { User } from '../../models/user'
 import express, {
   Request,
   Response,
@@ -328,7 +328,7 @@ class AuthController {
           user.resetTokenExpiration = Date.now() + 3600000
           await user.save()
           var adress = `http://localhost:${process.env.PORT}`
-          if (process.env.IS_GLITCH_SERVER) {
+          if (process.env.IS_GLITCH_SERVER === "true") {
             adress = `https://${process.env.PROJECT_DOMAIN}.glitch.me`
           }
 
